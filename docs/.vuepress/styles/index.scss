@@ -1,0 +1,9 @@
+.vp-navbar-item {
+    .route-link-active {
+        background: var(--c-brand);
+        color: green;
+        .category-num {
+            color: var(--c-bg);
+        }
+    }
+}
