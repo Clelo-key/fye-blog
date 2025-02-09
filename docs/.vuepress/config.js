@@ -3,16 +3,15 @@ import { defaultTheme } from '@vuepress/theme-default'
 import { defineUserConfig } from 'vuepress'
 import { viteBundler } from '@vuepress/bundler-vite'
 import sidebar from './sidebar'
-import * as echarts from 'echarts'
 
 export default defineUserConfig({
     lang: 'zh-CN',
     title: 'Welcome To Fye-Blog ！',
     description: '这里是我的个人博客，我会分享一些技术文章以及记录一些个人生活',
-
+    head: [['link', { rel: 'icon', href: '/images/header.jpg' }]],
     theme: defaultTheme({
         logo: './images/header.jpg',
-        extraStyles: ['styles/index.scss'], // 引入自定义 CSS 文件
+        extraStyles: ['styles/index.scss', 'styles/vars.scss'], // 引入自定义 CSS 文件
         navbar: [
             '/',
             {
@@ -30,7 +29,10 @@ export default defineUserConfig({
         ],
         sidebar,
         echarts: true,
-        repo: 'https://github.com/Snailclimb/JavaGuide'
+        // https://github.com/Clelo-key/fye-blog/edit/main/docs/posts/article2.md
+        repo: 'https://github.com/Clelo-key/fye-blogs',
+        docsRepo: 'Clelo-key/fye-blog',
+        docsDir: 'docs'
     }),
 
     plugins: [
@@ -38,7 +40,7 @@ export default defineUserConfig({
             // Only files under posts are articles
             filter: ({ filePathRelative }) =>
                 filePathRelative
-                    ? filePathRelative.startsWith('posts/')
+                    ? /^posts\//.test(filePathRelative) // 使用正则表达式
                     : false,
 
             // Getting article info
@@ -75,6 +77,20 @@ export default defineUserConfig({
                         title: `Category ${name}`
                         // sidebar: false
                     })
+                },
+                {
+                    key: 'tag',
+                    getter: (page) => page.frontmatter.tag || [],
+                    // layout: 'Article',
+                    itemLayout: 'Article',
+                    frontmatter: () => ({
+                        title: 'Article'
+                        // sidebar: false
+                    }),
+                    itemFrontmatter: (name) => ({
+                        title: `Tag ${name}`,
+                        sidebar: false
+                    })
                 }
             ],
 
@@ -82,11 +98,11 @@ export default defineUserConfig({
                 {
                     key: 'article',
                     // Remove archive articles
-                    filter: (page) => !page.frontmatter.archive,
+                    // filter: (page) => !page.frontmatter.archive,
                     layout: 'Article',
                     frontmatter: () => ({
-                        title: 'Articles',
-                        sidebar: false
+                        title: 'Articles'
+                        // sidebar:false
                     }),
                     // Sort pages with time and sticky
                     sorter: (pageA, pageB) => {

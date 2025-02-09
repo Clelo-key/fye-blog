@@ -4,9 +4,10 @@
 -   **性别**：男
 -   **专业**：计算机科学与技术
 -   **电话**：19183527031
--   **邮箱**：17723471643@163.com
+-   **邮箱**：zyfyenet@163.com
 -   **GitHub**：[https://github.com/Clelo-key](https://github.com/Clelo-key)
 -   **求职意向**：Java后端开发
+-   **个人博客**: [https://fyed.top](https://fyed.top)
 
 ## 教育经历
 

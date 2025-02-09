@@ -7,3 +7,15 @@
         }
     }
 }
+
+.vp-sidebar-items {
+    li {
+        &:hover {
+            background-color: rgba(101, 117, 133, 0.12);
+        }
+        .vp-sidebar-item {
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+}

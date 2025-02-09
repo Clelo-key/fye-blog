@@ -35,11 +35,12 @@ const categoryMap = useBlogCategory('category')
 
 <style lang="scss" scoped>
 @use '@vuepress/theme-default/styles/mixins';
+@use '../styles/vars';
 
 .page {
-    margin-top: 3.6rem;
-    .article-wrapper {
-        margin: 0 0 0 300px;
+    margin: 3.6rem 0 0 300px;
+    @media (max-width: vars.$adapt-phone) {
+        margin: 3.6rem 0 0 0;
     }
     .category-wrapper {
         @include mixins.content_wrapper;
@@ -52,8 +53,6 @@ const categoryMap = useBlogCategory('category')
             a {
                 color: inherit;
             }
-
-            margin: 0 0 0 300px;
         }
 
         .category {

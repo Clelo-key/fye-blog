@@ -10,19 +10,7 @@ import 'echarts-wordcloud'
 const route = useRoute()
 const tagMap = useBlogCategory('tag')
 const chartRef = ref(null)
-console.log(tagMap.value)
-
-// 词云数据
-const data = [
-    { name: 'Vue', value: 100 },
-    { name: 'React', value: 80 },
-    { name: 'Angular', value: 60 },
-    { name: 'Svelte', value: 40 },
-    { name: 'Node.js', value: 30 },
-    { name: 'TypeScript', value: 50 },
-    { name: 'JavaScript', value: 90 }
-]
-
+console.log()
 // 初始化图表
 let myChart = null
 onMounted(() => {
@@ -31,7 +19,7 @@ onMounted(() => {
 
         const option = {
             title: {
-                text: '词云',
+                // text: '词云',
                 left: 'center'
             },
             tooltip: {
@@ -73,7 +61,8 @@ onMounted(() => {
                     data: Object.keys(tagMap.value.map).map((item) => {
                         return {
                             name: item,
-                            value: tagMap.value.map[item].items.length
+                            value: tagMap.value.map[item].items.length,
+                            path: tagMap.value.map[item].path
                         }
                     })
                 }
@@ -81,6 +70,10 @@ onMounted(() => {
         }
 
         myChart.setOption(option)
+
+        myChart.on('click', (params) => {
+            window.location.href = params.data.path
+        })
 
         // 窗口大小变化时调整图表大小
         window.addEventListener('resize', () => {
@@ -96,13 +89,15 @@ onUnmounted(() => {
         myChart = null
     }
 })
+
+// 图标点击事件
 </script>
 
 <template>
     <ParentLayout>
         <template #page>
             <main class="page">
-                <div ref="chartRef" id="container" class="tag-wrapper">
+                <div ref="chartRef" class="tag-wrapper">
                     <!-- <RouteLink
                         v-for="({ items, path }, name, index) in tagMap.map"
                         :key="name"
@@ -124,65 +119,14 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-@use '@vuepress/theme-default/styles/mixins';
+// @use '@vuepress/theme-default/styles/mixins';
 
-.page {
-    margin-top: 3.6rem;
-}
+// .page {
+//     margin-top: 3.6rem;
+// }
 
 .tag-wrapper {
-    position: relative;
-    width: 400px; /* 容器宽度（2 * 半径） */
-    height: 400px; /* 容器高度（2 * 半径） */
-    // right: -100px;
-    padding-top: 1rem !important;
-    padding-bottom: 0 !important;
-    font-size: 14px;
-    margin: 0 auto;
-
-    // .tag {
-    //     position: absolute;
-    //     display: inline-block;
-    //     vertical-align: middle;
-    //     border-radius: 0.25rem;
-    //     border: 1px solid #ccc;
-    //     overflow: hidden;
-    //     white-space: nowrap;
-    //     margin: 0;
-    //     padding: 0.4rem 0.8rem;
-    //     cursor: pointer;
-    //     transition:
-    //         background 0.3s,
-    //         color 0.3s;
-
-    //     .tag-num {
-    //         display: inline-block;
-
-    //         min-width: 1rem;
-    //         height: 1.2rem;
-    //         margin-inline-start: 0.2em;
-    //         padding: 0 0.1rem;
-    //         border-radius: 0.6rem;
-
-    //         font-size: 0.7rem;
-    //         line-height: 1.2rem;
-    //         text-align: center;
-    //     }
-
-    //     &.route-link-active {
-    //         background: var(--c-brand);
-    //         color: green;
-
-    //         .tag-num {
-    //             color: var(--c-bg);
-    //         }
-    //     }
-    //     &:hover {
-    //         background: var(--c-brand); /* 背景颜色变化 */
-    //         color: rgb(153, 195, 224); /* 文字颜色变化 */
-    //         transform: scale(1.1); /* 缩放效果 */
-    //         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
-    //     }
-    // }
+    width: 250px; /* 容器宽度（2 * 半径） */
+    height: 300px; /* 容器高度（2 * 半径） */
 }
 </style>
