@@ -1,21 +1,38 @@
 <script setup>
 import { useBlogCategory } from '@vuepress/plugin-blog/client'
-import ParentLayout from '@vuepress/theme-default/layouts/Layout.vue'
-import { RouteLink, useRoute } from 'vuepress/client'
-import ArticleList from '../components/ArticleList.vue'
+import { useRoute } from 'vuepress/client'
 import { ref, onMounted, onUnmounted } from 'vue'
-import * as echarts from 'echarts'
-import 'echarts-wordcloud'
 
 const route = useRoute()
 const tagMap = useBlogCategory('tag')
+
 const chartRef = ref(null)
-console.log()
-// 初始化图表
 let myChart = null
-onMounted(() => {
+
+// 动态加载 ECharts 和 ECharts-Wordcloud
+const loadECharts = () => {
+    return new Promise((resolve, reject) => {
+        const echartScript = document.createElement('script')
+        echartScript.src =
+            'https://jsd.onmicrosoft.cn/npm/echarts@5.6.0/dist/echarts.min.js'
+        echartScript.onload = () => {
+            const wordcloudScript = document.createElement('script')
+            wordcloudScript.src =
+                'https://jsd.onmicrosoft.cn/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js'
+            wordcloudScript.onload = () => {
+                resolve()
+            }
+            document.head.appendChild(wordcloudScript)
+        }
+        echartScript.onerror = reject
+        document.head.appendChild(echartScript)
+    })
+}
+
+// 初始化图表
+const initChart = () => {
     if (chartRef.value) {
-        myChart = echarts.init(chartRef.value)
+        myChart = window.echarts.init(chartRef.value)
 
         const option = {
             title: {
@@ -80,6 +97,15 @@ onMounted(() => {
             myChart.resize()
         })
     }
+}
+
+onMounted(async () => {
+    try {
+        await loadECharts()
+        initChart()
+    } catch (error) {
+        console.error('Failed to load ECharts scripts:', error)
+    }
 })
 
 // 组件卸载时销毁图表
@@ -94,11 +120,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <ParentLayout>
-        <template #page>
-            <main class="page">
-                <div ref="chartRef" class="tag-wrapper">
-                    <!-- <RouteLink
+    <main class="page">
+        <div ref="chartRef" class="tag-wrapper">
+            <!-- <RouteLink
                         v-for="({ items, path }, name, index) in tagMap.map"
                         :key="name"
                         :to="path"
@@ -111,11 +135,9 @@ onUnmounted(() => {
                             {{ items.length }}
                         </span>
                     </RouteLink> -->
-                </div>
-                <!-- <ArticleList :items="tagMap.currentItems ?? []" /> -->
-            </main>
-        </template>
-    </ParentLayout>
+        </div>
+        <!-- <ArticleList :items="tagMap.currentItems ?? []" /> -->
+    </main>
 </template>
 
 <style lang="scss" scoped>

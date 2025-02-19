@@ -6,6 +6,8 @@ tag:
     - english
     - out date
 excerpt: 整理的一些英语语法知识。
+date: 2020-01-01
+createTime: 2023-11-15 14:56:29
 ---
 
 # 前言:
@@ -227,7 +229,7 @@ Most people consider a school teacher a good wife. 大多数人认为小学老�
 
 ### (二). 复合名词的复数形式
 
-一般复合名词的复数形式通常是直接在最后一个名词后加 <span style="color:red">-s<span>.
+一般复合名词的复数形式通常是直接在最后一个名词后加 <span style="color:red">-s</span>.
 
 -   dishwashers
 -   pole-vaulters

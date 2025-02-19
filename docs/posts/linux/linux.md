@@ -6,6 +6,7 @@ tag:
     - linux
     - out date
 excerpt: 一些常用的linux命令，包括用户管理，权限配置，文件解压缩等。
+date: 2020-01-01
 ---
 
 ## linux 用户管理:

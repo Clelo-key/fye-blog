@@ -54,11 +54,9 @@ defineProps({
 </template>
 
 <style lang="scss">
-@use '@vuepress/theme-default/styles/mixins';
-
 .article-wrapper {
+    padding: 2rem;
     text-align: center;
-    @include mixins.content_wrapper;
 }
 
 .article {

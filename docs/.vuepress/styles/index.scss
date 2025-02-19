@@ -19,3 +19,26 @@
         }
     }
 }
+
+.vp-feature-title {
+    span {
+        color: red;
+    }
+}
+
+html[data-theme='dark'] {
+    .vp-hero-actions {
+        .primary {
+            color: rgb(190, 252, 3);
+        }
+        .secondary {
+            &:hover {
+                color: rgb(71, 64, 204);
+            }
+        }
+    }
+}
+
+:root {
+    $adapt-phone: 720px;
+}

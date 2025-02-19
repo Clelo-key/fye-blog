@@ -1,0 +1,74 @@
+// background
+$vp-c-bg: (
+    light: #fff,
+    dark: #1b1b1f
+) !default;
+$vp-c-bg-alt: (
+    light: #f6f6f7,
+    dark: #161618
+) !default;
+$vp-c-bg-elv: (
+    light: #fff,
+    dark: #202127
+) !default;
+
+// text
+$vp-c-text: (
+    light: rgb(60 60 67),
+    dark: rgb(235 235 245 / 86%)
+) !default;
+
+// border
+$vp-c-border: (
+    light: #c2c2c4,
+    dark: #3c3f44
+) !default;
+$vp-c-gutter: (
+    light: #e2e2e3,
+    dark: #000
+) !default;
+
+// shadow
+$vp-c-shadow: (
+    light: rgb(0 0 0 / 15%),
+    dark: rgb(0 0 0 / 30%)
+) !default;
+
+// control
+$vp-c-control: (
+    light: rgb(142 150 170 / 10%),
+    dark: rgb(101 117 133 / 12%)
+) !default;
+$vp-c-control-hover: (
+    light: rgb(142 150 170 / 16%),
+    dark: rgb(101 117 133 / 18%)
+) !default;
+$vp-c-control-disabled: (
+    light: #eaeaea,
+    dark: #363636
+) !default;
+
+// navbar
+$navbar-height: 3.75rem !default;
+$navbar-padding-x: 1.5rem !default;
+$navbar-padding-y: 0.7rem !default;
+$navbar-mobile-height: 3.25rem !default;
+$navbar-mobile-padding-x: 1rem !default;
+$navbar-mobile-padding-y: 0.5rem !default;
+
+// sidebar
+$sidebar-width: 18rem !default;
+$sidebar-mobile-width: 16rem !default;
+
+// content
+$content-width: 780px !default;
+$home-page-width: 1160px !default;
+
+// font
+$vp-font: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", STHeiti, "Microsoft YaHei", SimSun, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' !default;
+$vp-font-heading: $vp-font !default;
+$vp-font-mono: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace' !default;
+
+// transition
+$vp-t-color: '0.3s ease' !default;
+$vp-t-transform: '0.3s ease' !default;

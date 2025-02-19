@@ -6,6 +6,8 @@ tag:
     - vue
     - out date
 excerpt: 一些vue的入门笔记，方便日后查阅。
+date: 2020-01-01
+star: true
 ---
 
 ## Vue 的两个特性

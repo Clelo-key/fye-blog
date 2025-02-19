@@ -1,6 +1,5 @@
 <script setup>
 import { useBlogCategory } from '@vuepress/plugin-blog/client'
-import ParentLayout from '@vuepress/theme-default/layouts/Layout.vue'
 import { RouteLink, useRoute } from 'vuepress/client'
 import ArticleList from '../components/ArticleList.vue'
 
@@ -9,41 +8,37 @@ const categoryMap = useBlogCategory('category')
 </script>
 
 <template>
-    <ParentLayout>
-        <template #page>
-            <main class="page">
-                <div class="category-wrapper">
-                    <RouteLink
-                        v-for="({ items, path }, name) in categoryMap.map"
-                        :key="name"
-                        :to="path"
-                        :active="route.path === path"
-                        class="category"
-                    >
-                        {{ name }}
-                        <span class="category-num">
-                            {{ items.length }}
-                        </span>
-                    </RouteLink>
-                </div>
-
-                <ArticleList :items="categoryMap.currentItems ?? []" />
-            </main>
-        </template>
-    </ParentLayout>
+    <main class="page">
+        hhh
+        <div class="category-wrapper">
+            <RouteLink
+                v-for="({ items, path }, name) in categoryMap.map"
+                :key="name"
+                :to="path"
+                :active="route.path === path"
+                class="category"
+            >
+                {{ name }}
+                <span class="category-num">
+                    {{ items.length }}
+                </span>
+            </RouteLink>
+        </div>
+        <ArticleList :items="categoryMap.currentItems ?? []" />
+    </main>
 </template>
 
 <style lang="scss" scoped>
-@use '@vuepress/theme-default/styles/mixins';
-@use '../styles/vars';
+// @use '@vuepress/theme-default/styles/mixins';
+@use '../styles/config';
 
 .page {
-    margin: 3.6rem 0 0 300px;
-    @media (max-width: vars.$adapt-phone) {
+    margin: 3.6rem 0 0 var(--sidebar-width);
+    @media (max-width: config.$tablet) {
         margin: 3.6rem 0 0 0;
     }
     .category-wrapper {
-        @include mixins.content_wrapper;
+        // @include mixins.content_wrapper;
         & {
             padding-top: 1rem !important;
             padding-bottom: 0 !important;
