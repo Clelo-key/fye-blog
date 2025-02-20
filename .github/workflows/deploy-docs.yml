@@ -17,9 +17,6 @@ jobs:
                   # “最近更新时间” 等 git 日志相关信息，需要拉取全部提交记录
                   fetch-depth: 0
 
-            - name: 设置 npm
-              uses: npm/action-setup@v4
-
             - name: 设置 Node.js
               uses: actions/setup-node@v4
               with:
@@ -33,7 +30,7 @@ jobs:
 
             # 运行构建脚本
             - name: 构建 VuePress 站点
-              run: npm run build
+              run: npm run docs:build
 
             # 查看 workflow 的文档来获取更多信息
             # @see https://github.com/crazy-max/ghaction-github-pages
