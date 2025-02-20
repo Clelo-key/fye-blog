@@ -14,5 +14,5 @@ traversal-folder-replace-string.py
 format-markdown.py
 
 .npmrc
-package-lock.json
+# package-lock.json
 lintmd-config.json
