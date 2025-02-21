@@ -5,7 +5,7 @@ import theme from './theme'
 export default defineUserConfig({
     lang: 'zh-CN',
     title: 'Welcome To Fye-Blog ！',
-    base: '/', // 替换为你的仓库名称
+    base: '/fye-blog/', // 替换为你的仓库名称
     description: '这里是我的个人博客，我会分享一些技术文章以及记录一些个人生活',
     theme,
     // pwa 建议设置为 false
