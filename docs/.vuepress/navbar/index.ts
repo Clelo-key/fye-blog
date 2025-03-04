@@ -13,5 +13,9 @@ export default navbar([
     {
         text: '更新历史',
         link: '/timeline/'
+    },
+    {
+        text: '个人网盘',
+        link: 'http://fyed.top:5244/@login'
     }
 ])

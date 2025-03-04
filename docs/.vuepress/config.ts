@@ -11,5 +11,19 @@ export default defineUserConfig({
     // pwa 建议设置为 false
     shouldPrefetch: false,
     bundler: viteBundler(),
-    head: [['link', { rel: 'icon', href: '/images/logo.png' }]]
+    head: [
+        ['link', { rel: 'icon', href: '/images/logo.png' }],
+        // 添加百度统计
+        [
+            'script',
+            {},
+            `var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?d577272a8eca77fe83f1777fd580e932";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();`
+        ]
+    ]
 })

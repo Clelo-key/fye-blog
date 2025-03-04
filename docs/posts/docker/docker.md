@@ -15,7 +15,7 @@ About more please Read [offcial site!](https://www.docker.com/)
 
 ## 安装docker
 
-这里仅仅演示在Centos中如何安装docker
+这里仅仅演示如何在Centos中安装docker
 
 ### 前置工作
 
@@ -92,53 +92,160 @@ docker pull 过慢可尝试在daemon.json文件中添加国内源,并重启docke
 vim /etc/docker/daemon.json  // 修改daemon文件，如若仍然缓慢，请自行修改寻找镜像源。
 
 {
-"registry-mirrors": [
- "https://9cpn8tt6.mirror.aliyuncs.com",
- "https://registry.docker-cn.com"
-]
+    "registry-mirrors": [
+        "https://docker.xuanyuan.me",
+        "https://docker.1panel.live/",
+        "http://hub-mirror.c.163.com",
+        "https://mirrors.tuna.tsinghua.edu.cn",
+        "http://mirrors.sohu.com",
+        "https://ustc-edu-cn.mirror.aliyuncs.com",
+        "https://ccr.ccs.tencentyun.com",
+        "https://docker.m.daocloud.io",
+        "https://docker.awsl9527.cn"
+    ]
 }
 
 systemctl daemon-reload // 重新加载daemon
 systemctl restart docker  // 重启dockers服务
 ```
 
-## 为什么要使用Docker
+## 作业一！！！ 使用dockerfile构建镜像（nginx+php-fpm）
 
-我是一名在校大学生，我自己超爱学习，编写完成了超多的项目。一天，我们的老师布置了一个大作业，他叫我们在一个月后完成一个 Web 项目。我很高兴，随手将我的作业交了上去。老师也很欣喜，班级上居然有如此厉害的学生，为了激励同学们，他当场就给了我满分。这使得我在同学们中享有极好的声誉。一周后，许多同学慕名而来让我帮助他们完成这个作业，并表示能给我一笔极好的报酬，
-面对高额悬赏，我只好“却之不恭”了。那时可怜的我还不知道接下来的两天面对源源不断的订单，我将会后悔那“却之不恭”时的窃喜……
+1. 确保你已经安装docker（建议使用虚拟机，保证主机与虚拟机正常连接。且提前建立快照，避免建立的测试环境干扰以后的开发环境），
+2. 创建dockerfile，文件内容见后文。
 
-面对这么多台电脑，我发现在这一周我的同学们根据各种不同的途径下载了各种各样的开发环境java8,java17，python2，python3，mysql5，mysql8等，简直是五花八门，各显神通。可是我所有的项目都使用的是java21，没有一个项目能直接在他们的电脑上运行起来。终于，在这两天内不断的安装、卸载、调试各类开发环境时，我崩溃了。
-
-最终我只能请教一下神秘的群内大佬，大佬在了解情况后直接向我甩出了一个链接[docker](https://www.docker.com/)。我怀着激动的心情阅读其中内容后发现了治疗我病症的林丹妙药 —— Docker。
-
-1. 用户可以使用docker编写项目的运行环境，编写出的文件叫做dockerFile。
-2. 在运行环境中可以添加其它运行环境。或者说各种运行环境可以叠加，你可以在当前环境的基础上再次添加其它环境，成为一个新的环境。新的环境也可以再次添加环境。
-3. 构建好的环境称为docker镜像，可以使用run命令运行镜像。运行的镜像被称为容器，此时可以将项目放入容器中。
-
-创建一个名为 .dockerfile的文件，写入以下内容。
-
-```
-FROM python:3.9-slim
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-EXPOSE 5000
-CMD ["python", "app.py"]
+```bash
+vim .dockerfile_php
 ```
 
-在dockerfile所处文件夹下，使用docker build构建docker镜像。
+3. 创建www.conf配置文件，内容见后文。
+
+```bash
+vim www.conf
+```
+
+4. 创建nginx.conf文件，内容见后文。
+
+```bash
+vim nginx.conf
+```
+
+5. 创建php文件，内容见后文
 
 ```
-docker build -t my-python-app .
+vim index.php
 ```
 
-::: tip 小数点是上下文路径，不能省略。
-:::
+6. 构建镜像
 
-使用docker run 运行镜像
+```bash
+docker build -t images-nginx-php -f .dockerfile_php .
+```
+
+7. 创建容器
+
+```bash
+docker run -d  --name nginx-php -p 80:80 images-nginx-php
+```
+
+8. 主机中测试访问是否发生异常,192.168.29.10是你虚拟机的ip
 
 ```
-docker run -d -p 80:8080 nginx
+http://192.168.29.10/info.php
+```
+
+9. 若执行第六步发生异常，大概率是网络问题。
+
+```bash
+# 在互联网上寻找镜像源，执行以下内容，并修改registry-mirrors的值
+vim /etc/docker/daemon.json
+```
+
+.dockerfile_php 内容如下
+
+```bash
+FROM centos:latest
+
+ENV NGINX_VERSION 1.20.1
+
+ENV PHP_VERSION 7.4
+
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum makecache
+RUN yum update -y
+
+RUN yum install -y nginx
+
+RUN yum install -y php-fpm php-mysqlnd php-gd php-xml php-mbstring
+
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY index.php /var/www/html/info.php
+COPY www.conf /etc/php-fpm.d/www.conf
+
+RUN mkdir -p /var/www/html && chown -R nginx:nginx /var/www/html
+RUN mkdir -p /run/php-fpm && chown nginx:nginx /run/php-fpm && chmod 755 /run/php-fpm
+
+EXPOSE 80
+CMD ["bash", "-c", "nginx -g 'daemon off;' & php-fpm -D && wait"]
+
+```
+
+www.conf 配置内容如下
+
+```
+[www]
+user = nginx
+group = nginx
+listen = 127.0.0.1:9000
+listen.owner = nginx
+listen.group = nginx
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+
+```
+
+nginx.conf文件内容如下
+
+```
+events {}
+http {
+ server {
+    listen       80;
+    server_name  localhost;
+    root         /usr/share/nginx/html;
+
+    location / {
+        index  index.php index.html index.htm;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+    location ~ \.php$ {
+        root           /var/www/html;  # 确保路径与 PHP 文件实际位置一致
+        fastcgi_pass   127.0.0.1:9000; # 使用正确的主机和端口
+        fastcgi_index  info.php;
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+
+  }
+}
+
+```
+
+index.php 文件内容如下
+
+```
+<?php
+phpinfo();
+?>
+
 ```
 
 ## docker常用命令
@@ -205,3 +312,45 @@ docker run -d -p 80:8080 nginx
 | STOPSIGNAL      | 设置发送给容器以退出的系统调用信号。                                 |
 | HEALTHCHECK     | 定义周期性检查容器健康状态的命令。                                   |
 | SHELL           | 覆盖Docker中默认的shell，用于RUN、CMD和ENTRYPOINT指令。              |
+
+## 为什么要使用Docker
+
+为了解答这个问题，大家可以先看看这个小故事。
+
+我是一名在校大学生，我自己超爱学习，编写完成了超多的项目。一天，我们的老师布置了一个大作业，他叫我们在一个月后完成一个 Web 项目。我很高兴，随手将我的作业交了上去。老师也很欣喜，班级上居然有如此厉害的学生，为了激励同学们，他当场就给了我满分。这使得我在同学们中享有极好的声誉。一周后，许多同学慕名而来让我帮助他们完成这个作业，并表示能给我一笔极好的报酬，面对高额悬赏，我只好“却之不恭”了。那时可怜的我还不知道接下来的两天，面对源源不断的订单，我将会后悔那“却之不恭”时的窃喜……
+
+面对这么多台电脑，我发现在这一周我的同学们根据各种不同的途径下载了各种各样的开发环境java8,java17，python2，python3，mysql5，mysql8等，简直是五花八门，各显神通。可是我所有的项目都使用的是java21，没有一个项目能直接在他们的电脑上运行起来。终于，在这两天内不断的安装、卸载、调试各类开发环境时，我崩溃了。
+
+最终我只能请教一下神秘的群内大佬，大佬在了解情况后直接向我甩出了一个链接[docker](https://www.docker.com/)。我怀着激动的心情阅读其中内容后发现了治疗我病症的林丹妙药 —— Docker。当用户安装Docker后，可以自己编写dockerfile，为项目配置环境，配置好了的环境可以生成为docker镜像直接发给同学们，同学们只需要通过Docker运行我的镜像，项目就能如我在本地环境中一样顺利启动。
+
+### 总结：
+
+1. 用户可以使用docker编写项目的运行环境，编写出的文件叫做dockerFile。
+2. 在运行环境中可以添加其它运行环境。或者说各种运行环境可以叠加，你可以在当前环境的基础上再次添加其它环境，成为一个新的环境。新的环境也可以再次添加环境。
+3. 构建好的环境称为docker镜像，可以使用run命令运行镜像。运行的镜像被称为容器，此时可以将项目放入容器中。
+
+创建一个名为 .dockerfile的文件，写入以下内容。
+
+```
+FROM python:3.9-slim
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+EXPOSE 5000
+CMD ["python", "app.py"]
+```
+
+在dockerfile所处文件夹下，使用docker build构建docker镜像。
+
+```
+docker build -t my-python-app .
+```
+
+::: tip 小数点是上下文路径，不能省略。
+:::
+
+使用docker run 运行镜像
+
+```
+docker run -d -p 80:8080 nginx
+```

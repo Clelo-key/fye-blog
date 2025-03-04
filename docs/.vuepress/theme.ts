@@ -8,6 +8,11 @@ export default hopeTheme({
         name: '周悦',
         url: 'https://fyed.top'
     },
+    // navbarLayout: {
+    //     start: ['Brand'],
+    //     center: ['Links'],
+    //     end: ['Language', 'Repo', 'Outlook', 'Search']
+    // },
     navbar,
     sidebar,
     repo: 'https://github.com/Clelo-key/fye-blog',
