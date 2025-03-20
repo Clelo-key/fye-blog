@@ -86,27 +86,39 @@ systemctl start docker
 docker run hello-world
 ```
 
-docker pull 过慢可尝试在daemon.json文件中添加国内源,并重启docker。
+pull 镜像出现网络问题可参照以下步骤配置镜像源
+
+### 配置docker镜像源
+
+1. 修改配置文件
 
 ```
 vim /etc/docker/daemon.json  // 修改daemon文件，如若仍然缓慢，请自行修改寻找镜像源。
+```
 
+2. 在粘贴中粘贴以下内容，并检查粘贴是否完整无误。
+
+```
 {
-    "registry-mirrors": [
-        "https://docker.xuanyuan.me",
-        "https://docker.1panel.live/",
-        "http://hub-mirror.c.163.com",
-        "https://mirrors.tuna.tsinghua.edu.cn",
-        "http://mirrors.sohu.com",
-        "https://ustc-edu-cn.mirror.aliyuncs.com",
-        "https://ccr.ccs.tencentyun.com",
-        "https://docker.m.daocloud.io",
-        "https://docker.awsl9527.cn"
-    ]
+ "registry-mirrors": [
+  "https://registry.docker-cn.com",
+  "http://hub-mirror.c.163.com",
+  "https://dockerhub.azk8s.cn",
+  "https://mirror.ccs.tencentyun.com",
+  "https://registry.cn-hangzhou.aliyuncs.com",
+  "https://docker.mirrors.ustc.edu.cn",
+  "https://docker.m.daocloud.io",
+  "https://noohub.ru",
+  "https://huecker.io",
+  "https://dockerhub.timeweb.cloud"
+ ]
 }
+```
 
-systemctl daemon-reload // 重新加载daemon
-systemctl restart docker  // 重启dockers服务
+3. 执行以下命令使镜像源生效
+
+```
+systemctl daemon-reload && systemctl restart docker
 ```
 
 ## 作业一！！！ 使用dockerfile构建镜像（nginx+php-fpm）
@@ -154,12 +166,7 @@ docker run -d  --name nginx-php -p 80:80 images-nginx-php
 http://192.168.29.10/info.php
 ```
 
-9. 若执行第六步发生异常，大概率是网络问题。
-
-```bash
-# 在互联网上寻找镜像源，执行以下内容，并修改registry-mirrors的值
-vim /etc/docker/daemon.json
-```
+9. 若执行第六步发生异常，大概率是网络问题，请点击[配置docker镜像源](#配置docker镜像源)，查看解决方法。
 
 .dockerfile_php 内容如下
 
@@ -246,6 +253,64 @@ index.php 文件内容如下
 phpinfo();
 ?>
 
+```
+
+## 作业二！！！ 使用dockerfile构建镜像（apache+php）
+
+1. 确保你已经安装docker，且虚拟机的80端口未被占用。建议恢复以前的快照。
+2. 创建dockerfile，文件内容见后文。
+
+```bash
+vim .dockerfile_apache
+```
+
+3. 创建index.php文件，
+
+```
+echo "<?php phpinfo(); ?>" > ./index.php
+```
+
+4. 构建镜像
+
+```bash
+docker build -t image-php-apache -f .dockerfile_apache .
+```
+
+5. 创建容器
+
+```bash
+docker run -d  --name centos-php-apache -p 80:80 image-php-apache
+```
+
+6. 在浏览器中输入虚拟机的Ip查看是否有php字样显示
+
+7. 如运行第4步出现异常，大概率是网络问题，请点击[配置docker镜像源](#配置docker镜像源)，查看解决方法。
+
+.dockerfile_apache内容如下
+
+```bash
+FROM centos:centos7
+
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum clean all
+RUN yum makecache
+RUN yum update -y
+
+RUN yum -y install httpd php-fpm php-cli php-mysqlnd
+
+FROM php:7.4-apache
+WORKDIR /var/www/html
+
+COPY index.php /var/www/html/index.php
+
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+EXPOSE 80
+
+# 启动 Apache 和 PHP-FPM
+CMD ["apache2-foreground"]
 ```
 
 ## docker常用命令
