@@ -11,6 +11,10 @@ actions:
       link: /resume
       type: secondary
 features:
+    - title: '机场推荐'
+      details: 超便宜机场，月付套餐500G仅2元，点击链接立刻注册！
+      link: https://knjc.cfd/#/register?code=WnUd7MzK
+
     - title: '超大流量卡办理'
       details: 各类资费任您挑选，点击即刻进行办理！ 添加客服微信可资讯详细信息哦！
       link: https://hk.yunhaoka.cn/#/pages/micro_store/index?agent_id=4ddca7f97766b7dbb967e505d8255dd7

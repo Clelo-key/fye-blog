@@ -10,8 +10,8 @@ date: 2024-02-24
 
 ## 关于Docker
 
-本编文章仅仅做docker的简单介绍，更多内容请访问官方链接。
-About more please Read [offcial site!](https://www.docker.com/)
+本篇文章仅仅做docker的简单介绍，更多内容请访问官方链接。
+[offcial site!](https://www.docker.com/)
 
 ## 安装docker
 
@@ -121,82 +121,51 @@ vim /etc/docker/daemon.json  // 修改daemon文件，如若仍然缓慢，请自
 systemctl daemon-reload && systemctl restart docker
 ```
 
-## 作业一！！！ 使用dockerfile构建镜像（nginx+php-fpm）
+## 作业一 ！！！请看LNMP的那篇文件，这篇已经过时
+
+### 步骤一 安装php和nginx
 
 1. 确保你已经安装docker（建议使用虚拟机，保证主机与虚拟机正常连接。且提前建立快照，避免建立的测试环境干扰以后的开发环境），
-2. 创建dockerfile，文件内容见后文。
+2. 创建dockerfile。
 
 ```bash
 vim .dockerfile_php
 ```
 
-3. 创建www.conf配置文件，内容见后文。
-
-```bash
-vim www.conf
-```
-
-4. 创建nginx.conf文件，内容见后文。
-
-```bash
-vim nginx.conf
-```
-
-5. 创建php文件，内容见后文
-
-```
-vim index.php
-```
-
-6. 构建镜像
-
-```bash
-docker build -t images-nginx-php -f .dockerfile_php .
-```
-
-7. 创建容器
-
-```bash
-docker run -d  --name nginx-php -p 80:80 images-nginx-php
-```
-
-8. 主机中测试访问是否发生异常,192.168.29.10是你虚拟机的ip
-
-```
-http://192.168.29.10/info.php
-```
-
-9. 若执行第六步发生异常，大概率是网络问题，请点击[配置docker镜像源](#配置docker镜像源)，查看解决方法。
-
 .dockerfile_php 内容如下
 
 ```bash
-FROM centos:latest
+FROM centos:7
 
 ENV NGINX_VERSION 1.20.1
 
 ENV PHP_VERSION 7.4
 
-RUN cd /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+COPY epel.repo /etc/yum.repos.d/epel.repo
+COPY CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+RUN yum clean all
 RUN yum makecache
-RUN yum update -y
 
 RUN yum install -y nginx
-
 RUN yum install -y php-fpm php-mysqlnd php-gd php-xml php-mbstring
 
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY index.php /var/www/html/info.php
+COPY index.php /var/www/html/index.php
 COPY www.conf /etc/php-fpm.d/www.conf
 
 RUN mkdir -p /var/www/html && chown -R nginx:nginx /var/www/html
 RUN mkdir -p /run/php-fpm && chown nginx:nginx /run/php-fpm && chmod 755 /run/php-fpm
 
+
 EXPOSE 80
 CMD ["bash", "-c", "nginx -g 'daemon off;' & php-fpm -D && wait"]
 
+```
+
+3. 创建www.conf配置文件。。
+
+```bash
+vim www.conf
 ```
 
 www.conf 配置内容如下
@@ -216,6 +185,12 @@ pm.max_spare_servers = 3
 
 ```
 
+4. 创建nginx.conf文件。。
+
+```bash
+vim nginx.conf
+```
+
 nginx.conf文件内容如下
 
 ```
@@ -227,7 +202,7 @@ http {
     root         /usr/share/nginx/html;
 
     location / {
-        index  index.php index.html index.htm;
+        index  index.html index.htm;
     }
 
     error_page 404 /404.html;
@@ -235,24 +210,335 @@ http {
     location ~ \.php$ {
         root           /var/www/html;  # 确保路径与 PHP 文件实际位置一致
         fastcgi_pass   127.0.0.1:9000; # 使用正确的主机和端口
-        fastcgi_index  info.php;
+        fastcgi_index  index.php;
         fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include        fastcgi_params;
     }
-
 
   }
 }
 
 ```
 
-index.php 文件内容如下
+5. 创建php文件。
 
 ```
-<?php
-phpinfo();
-?>
+vim index.php
+```
 
+<details>
+<summary><a>index.php 文件内容,点击查看</a></summary>
+
+```php
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>用户管理</title>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">用户管理</h1>
+        <?php
+        $servername = "localhost";
+        $username = "your_username";
+        $password = "your_password";
+        $dbname = "your_database";
+
+        // 创建连接
+        $conn = new mysqli($servername, $username, $password, $dbname);
+
+        // 检查连接
+        if ($conn->connect_error) {
+            die("连接失败: " . $conn->connect_error);
+        }
+
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $name = $_POST["name"];
+            $phone = $_POST["phone"];
+
+            $sql = "INSERT INTO users (name, phone) VALUES ('$name', '$phone')";
+
+            if ($conn->query($sql) === TRUE) {
+                echo "<script>window.location.href='combined_users_management.php';</script>";
+            } else {
+                echo "错误: " . $sql . "<br>" . $conn->error;
+            }
+        }
+
+        $sql = "SELECT * FROM users";
+        $result = $conn->query($sql);
+        ?>
+        <form action="" method="post" class="bg-white p-4 rounded shadow mb-4">
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700 font-bold mb-2">姓名</label>
+                <input type="text" id="name" name="name" required class="border border-gray-300 p-2 w-full rounded">
+            </div>
+            <div class="mb-4">
+                <label for="phone" class="block text-gray-700 font-bold mb-2">手机号码</label>
+                <input type="text" id="phone" name="phone" required class="border border-gray-300 p-2 w-full rounded">
+            </div>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">添加用户</button>
+        </form>
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">用户列表</h2>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border border-gray-300 p-2">ID</th>
+                        <th class="border border-gray-300 p-2">姓名</th>
+                        <th class="border border-gray-300 p-2">手机号码</th>
+                        <th class="border border-gray-300 p-2">创建时间</th>
+                        <th class="border border-gray-300 p-2">更新时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td class='border border-gray-300 p-2'>" . $row["id"] . "</td>";
+                            echo "<td class='border border-gray-300 p-2'>" . $row["name"] . "</td>";
+                            echo "<td class='border border-gray-300 p-2'>" . $row["phone"] . "</td>";
+                            echo "<td class='border border-gray-300 p-2'>" . $row["created_at"] . "</td>";
+                            echo "<td class='border border-gray-300 p-2'>" . $row["updated_at"] . "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5' class='border border-gray-300 p-2 text-center'>暂无用户数据</td></tr>";
+                    }
+                    $conn->close();
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+</details>
+
+6. 创建CentOS-Base.repo文件。
+
+```
+vim CentOS-Base.repo
+```
+
+<details>
+<summary><a>CentOS-Base 文件内容,点击查看</a></summary>
+
+```bash
+[base]
+name=CentOS-$releasever - Base - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/os/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/os/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+#released updates
+[updates]
+name=CentOS-$releasever - Updates - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/updates/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/updates/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/updates/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+#additional packages that may be useful
+[extras]
+name=CentOS-$releasever - Extras - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/extras/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/extras/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/extras/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+#additional packages that extend functionality of existing packages
+[centosplus]
+name=CentOS-$releasever - Plus - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/centosplus/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/centosplus/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/centosplus/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+#contrib - packages by Centos Users
+[contrib]
+name=CentOS-$releasever - Contrib - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/contrib/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/contrib/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/contrib/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+
+```
+
+</details>
+
+7. 创建epel.repo文件。
+
+```
+vim epel.repo
+```
+
+<details>
+<summary><a> epel.repo 文件内容,点击查看</a></summary>
+
+```bash
+[epel]
+name=Extra Packages for Enterprise Linux 7 - $basearch
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch
+failovermethod=priority
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+[epel-debuginfo]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Debug
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch/debug
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+
+[epel-source]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Source
+baseurl=http://mirrors.aliyun.com/epel/7/SRPMS
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+
+```
+
+</details>
+
+8. 构建镜像
+
+```bash
+docker build -t images-nginx-php -f .dockerfile_php .
+```
+
+9. 创建容器
+
+```bash
+docker run -d  --name nginx-php -p 80:80 images-nginx-php
+```
+
+10. 主机中测试访问是否发生异常,192.168.29.10是你虚拟机的ip
+
+```
+http://192.168.29.10/index.php
+```
+
+ps 若执行过程中第六步发生异常，大概率是网络问题，请点击[配置docker镜像源](#配置docker镜像源)，查看解决方法。
+
+### 步骤二 安装mysql
+
+1. 编写dockerfile
+
+```
+vim .mysql-dockerfile
+```
+
+<details>
+<summary><a>.mysql-dockerfile 内容,点击查看</a></summary>
+
+```bash
+#基础镜像使用 mysql:latest
+FROM mysql:5.7
+
+#定义会被容器自动执行的目录
+ENV AUTO_RUN_DIR /docker-entrypoint-initdb.d
+
+#定义初始化sql文件
+ENV INSTALL_DB_SQL init.sql
+ENV MYSQL_ROOT_PASSWORD
+
+#把要执行的sql文件放到/docker-entrypoint-initdb.d/目录下，容器会自动执行这个sql
+COPY ./$INSTALL_DB_SQL $AUTO_RUN_DIR/
+
+
+#给执行文件增加可执行权限
+RUN chmod a+x $AUTO_RUN_DIR/$INSTALL_DB_SQL
+```
+
+</details>
+
+3. 创建mysql配置文件。
+
+```bash
+vim /root/docker/mysql/conf/conf.d/my.cnf
+```
+
+my.cnf 内容如下:
+
+```bash
+[client]
+default-character-set=utf8mb4
+
+[mysql]
+default-character-set=utf8mb4
+
+[mysqld]
+init_connect="SET collation_connection = utf8mb4_unicode_ci"
+init_connect="SET NAMES utf8mb4"
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+skip-character-set-client-handshake
+skip-name-resolve
+
+```
+
+4. 创建初始化sql文件init.sql
+
+```
+vim init.sql
+```
+
+init.sql内容如下
+
+```bash
+create database testdb;
+use testdb;
+
+CREATE TABLE users (
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '用户唯一标识',
+name VARCHAR(50) NOT NULL COMMENT '用户姓名',
+phone VARCHAR(15) NOT NULL UNIQUE COMMENT '手机号码',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_name (name),
+    INDEX idx_phone (phone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户信息表';
+
+INSERT INTO users (name, phone) VALUES ('John Doe', '99999999');
+INSERT INTO users (name, phone) VALUES ('Mical Json', '00000001');
+```
+
+5. 构建镜像
+
+```
+docker build -t image-mysql  -f .mysql-dockerfile .
+```
+
+6. 创建容器
+
+```bash
+docker run -d --privileged=true -p 3306:3306 -v /root/docker/mysql/conf/conf.d:/etc/mysql/conf.d -v /root/docker/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 --name mysql-learning image-mysql
 ```
 
 ## 作业二！！！ 使用dockerfile构建镜像（apache+php）
